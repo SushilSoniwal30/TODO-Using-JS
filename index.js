@@ -1,92 +1,79 @@
-console.log("Hello From JS!");
+console.log("Hello from Script!");
 
-let todoArray = [];
-let userInput = document.getElementById("exampleFormControlInput1");
-let saveBtn = document.getElementById("save-btn");
-let clearBtn = document.getElementById("clear-btn");
+let inputTask = document.getElementById("task-input");
+let clearBtn = document.getElementById("clear-button");
+let saveBtn = document.getElementById("save-button");
 
-userInput.addEventListener("keyup", function toggleInputBtns() {
-    if (userInput.value.length === 0) {
-        if (saveBtn.classList.contains("disabled")) {
-            return;
-        }
-        if (clearBtn.classList.contains("disabled")) {
-            return;
-        }
-        else {
-            saveBtn.classList.add("disabled");
-            clearBtn.classList.add("disabled");
-        }
-    }
-    else {
-        if (saveBtn.classList.contains("disabled")) {
-            saveBtn.classList.remove("disabled");
-        }
-        if (clearBtn.classList.contains("disabled")) {
-            clearBtn.classList.remove("disabled");
-        }
-    }
+let tasks = [];
+
+// Enable/Disable buttons based on input value
+inputTask.addEventListener("input", () => {
+    const isInputEmpty = inputTask.value.trim() === "";
+    saveBtn.classList.toggle("disabled", isInputEmpty);
+    clearBtn.classList.toggle("disabled", isInputEmpty);
 });
 
-saveBtn.addEventListener("click", function saveAndCreateTodo() {
-    let taskToPerform = userInput.value;
-    if (taskToPerform.length === 0) return;
-    else {
-        createTodo(taskToPerform);
-        userInput.value = "";
-        saveBtn.classList.add("disabled");
-        clearBtn.classList.add("disabled");
+// Save the task and reset input field
+saveBtn.addEventListener("click", () => {
+    if (inputTask.value.trim() === "") {
+        return;
     }
+    addTask(inputTask.value.trim());
+    inputTask.value = "";
+    saveBtn.classList.add("disabled");
+    clearBtn.classList.add("disabled");
 });
 
-clearBtn.addEventListener("click", function clearTodo() {
-    let taskToPerform = userInput.value;
-    if (taskToPerform.length === 0) return;
-    else {
-        userInput.value = "";
-        saveBtn.classList.add("disabled");
-        clearBtn.classList.add("disabled");
-    }
+// Clear input field
+clearBtn.addEventListener("click", () => {
+    inputTask.value = "";
+    saveBtn.classList.add("disabled");
+    clearBtn.classList.add("disabled");
 });
 
-let taskSection = document.getElementById("tasks");
-function createTodo(taskToPerform) {
-    let colDiv = document.createElement("div");
-    let rowDiv = document.createElement("div");
-    let todoNumber = document.createElement("div");
-    let todoDetail = document.createElement("div");
-    let todostatus = document.createElement("div");
-    let todoActions = document.createElement("div");
-    let editBtn = document.createElement("button");
-    let deleteBtn = document.createElement("button");
-    let hr = document.createElement("hr");
+// Add task in todo
+function addTask(taskDescription) {
+    tasks.push({ description: taskDescription, status: "In-Progress" });
+    renderTasks();
+}
 
-    todoArray.push(taskToPerform);
+let taskList = document.getElementById("task-list");
+// Render all the tasks
+function renderTasks() {
+    let taskContainer = taskList.querySelector("#task-container");
+    taskContainer.innerHTML = "";
 
-    todoNumber.textContent = `${todoArray.length}`;
-    todoDetail.textContent = taskToPerform;
-    todostatus.textContent = "In-Progress";
-    editBtn.textContent = "Edit";
-    deleteBtn.textContent = "Delete";
+    tasks.forEach((task, index) => {
+        let taskRow = document.createElement("div");
+        taskRow.className = "row d-flex justify-content-evenly align-items-center mb-2";
 
-    taskSection.appendChild(colDiv);
-    colDiv.appendChild(rowDiv);
-    rowDiv.appendChild(todoNumber);
-    rowDiv.appendChild(todoDetail);
-    rowDiv.appendChild(todostatus);
-    rowDiv.appendChild(todoActions);
-    todoActions.appendChild(editBtn);
-    todoActions.appendChild(deleteBtn);
-    rowDiv.appendChild(hr);
+        taskRow.innerHTML =
+            `
+        <div class="col-1 fw-bold">${index + 1}</div>
+        <div class="col-6">${task.description}</div>
+        <div class="col-2">${task.status}</div>
+        <div class="col-2 d-flex flex-wrap flex-md-nowrap gap-2">
+        <button class="btn btn-success btn-sm" onclick="editTask(${index})">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteTask(${index})">Delete</button>
+        </div>
+        <hr>
+        `;
 
-    // Add CSS
-    taskSection.classList.add("row", "tasks", "mt-3");
-    colDiv.classList.add("col-12");
-    rowDiv.classList.add("row", "d-flex", "justify-content-evenly", "align-items-center")
-    todoNumber.classList.add("todo-no", "col-1", "fw-bold", "pb-2");
-    todoDetail.classList.add("todo-detail", "col-6", "pb-2");
-    todostatus.classList.add("todo-status", "col-2", "pb-2");
-    todoActions.classList.add("col-2", "todo-actions", "d-md-flex", "flex-column", "flex-md-row", "justify-content-start", "align-items-md-center", "gap-1", "gap-md-2")
-    editBtn.classList.add("edit-btn", "btn", "btn-success", "mb-2");
-    deleteBtn.classList.add("delete-btn", "btn", "btn-danger", "mb-2");
+        taskContainer.appendChild(taskRow);
+    });
+}
+
+// Edit a task
+function editTask(index) {
+    const newDescription = prompt("Edit Task:", tasks[index].description);
+    if (newDescription) {
+        tasks[index].description = newDescription.trim();
+        renderTasks();
+    }
+}
+
+// Delete a task
+function deleteTask(index) {
+    tasks.splice(index, 1);
+    renderTasks();
 }
